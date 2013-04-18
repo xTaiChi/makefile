@@ -1,0 +1,39 @@
+.PHONY:dfu
+####################################################################
+# 生成DFU文件
+####################################################################
+
+CDR=/c/Program Files/CSR/BlueSuite/DFU Tools
+DIN="$(CDR)/dfukeyinsert"
+DSIGN="$(CDR)/dfusign"
+DBUILD="$(CDR)/dfubuild"
+
+####################################################################
+DR=c:\Program Files\CSR\BlueSuite\DFU Tools
+KEY0="$(DR)/my_app_key.public.key"
+PS0="$(DR)/stack_ps_unsigned.psr"
+PS1="$(OUTDIR)/stack_ps_with_key_unsigned"
+
+KEY1="$(DR)/my_stack_key.private.key"
+#PS2="$(DR)\stack_ps_signed.stack.psr"
+
+PS="$(OUTDIR)/stack_ps_signed"
+###################################################################
+KEY2="$(DR)/my_app_key.private.key"
+FS="$(OUTDIR)/app_signed"
+
+
+
+####################################################################
+DFUFILE = $(OUTDIR)/$(CLIENT_EN)-$(PROJECT)-$(DATE)-V$(VERSIONS).dfu
+#IMG=$(OUTDIR)/image.fs
+IMG=image.fs
+
+dfu:$(DFUFILE)
+
+$(DFUFILE):$(IMG)
+	$(DIN) -v -o $(PS1) -ps $(PS0) -ka $(KEY0)
+	$(DSIGN) -v -o $(PS) -ps $(PS1).psr -ks $(KEY1)
+	$(DSIGN) -v -o $(FS) -h $< -ka $(KEY2)
+	$(DBUILD) -v -pedantic -f $@ -uv 0x0a12 -up 0x0001 -ui "BuleCore firmware version release-1 with application and persistent store" -h "$(FS).fs" -p3 . "$(PS).stack.psr" .
+

@@ -1,0 +1,43 @@
+.PHONY:pack dump mkver
+####################################################################
+# ´ò°ü
+
+
+PACKDIR=$o/upStorage/$(CLIENT)/src
+PACK=$(CLIENT)-$(PROJECT)-$(DATE)-V$(VERSIONS)-src#.tar.gz
+
+TAR=rar
+TARFLAGS= a
+
+MV=openmv
+
+pack:clean
+	if [ ! -d $(PACKDIR) ];then\
+   		mkdir -p $(PACKDIR); \
+	fi
+	(open -C;)
+	$(TAR) $(TARFLAGS) $(PACK) *
+	$(MV) $(PACK).rar $(PACKDIR)
+
+####################################################################
+# DUMP
+#
+DUMPDIR=$o/upStorage/$(CLIENT)/dump
+DUMP=$(CLIENT)-$(PROJECT)-$(DATE)-V$(VERSIONS)
+DUMPFILE=$(CLIENT)-$(PROJECT)-$(DATE)-V$(VERSIONS)
+
+DUMPCMD=blueflashcmd
+PSCLI=$(BLUELAB)/bin/pscli
+
+mkver:
+	-rm -f clean.psr
+	mkver $(IC) $(VERSIONS) > clean.psr
+	$(PSCLI) -trans SPITRANS=$(SPI) -m clean.psr
+dump:mkver
+	if [ ! -d $(DUMPDIR) ];then\
+	   	mkdir -p $(DUMPDIR); \
+	fi;
+	(cd $(DUMPDIR) ; \
+		$(DUMPCMD) -trans SPITRANS=$(SPI) -DUMP $(DUMP);\
+		$(TAR) $(TARFLAGS)  $(DUMPFILE)-dump $(DUMPFILE).*; \
+	)

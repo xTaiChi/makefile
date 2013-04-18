@@ -1,0 +1,25 @@
+
+###################################################################
+OUTDIR=OUT
+BLUELAB=$(MAINDIR)
+CMD=${BLUELAB}/bin/make  -R BLUELAB=${BLUELAB} -f ${MKFILE}
+###################################################################
+.PHONY: all go build flash pack dump dfu clean
+###################################################################
+
+all:build
+go:build flash
+
+# ±‡“Î
+build:
+	${CMD} build
+# …’¬º
+flash:
+	${CMD} flash
+clean:
+	${CMD} clean
+	-rm *.o -f
+
+-include	Makefile.dfu
+-include	Makefile.pack
+
